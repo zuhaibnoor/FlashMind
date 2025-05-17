@@ -85,7 +85,44 @@ def add_flashcard():
         )
         return redirect('/home')
 
+@app.route('/edit_flashcard', methods = ['POST'])
+@login_required
+def edit_flashcard():
+    if request.method == "POST":
+        old_question = request.form.get('old_question')
+        new_question = request.form.get('question')
+        answer = request.form.get('answer')
+
+        if old_question != new_question:     
+            print(current_user.flashcards)       
+            current_user.flashcards.pop(old_question)
+            current_user.flashcards[new_question] = answer
         
+        else:
+            current_user.flashcards[new_question] = answer
+
+        mongo.db.FlashMind.update_one(
+            {"email":current_user.id},
+            {'$set':{'flashcards': current_user.flashcards}}
+        )
+
+    return render_template('home.html', flashcards = current_user.flashcards)
+
+
+@app.route('/delete_flashcard', methods = ['GET'])
+@login_required
+def delete_flashcard():
+    if request.method == "GET":
+        question = request.args.get('question')
+        current_user.flashcards.pop(question)
+        
+        mongo.db.FlashMind.update_one(
+            {'email': current_user.id},
+            {'$set': {'flashcards': current_user.flashcards}}
+        )
+    
+    return redirect('/home')
+
 
 @app.route('/home', methods = ['GET', 'POST'])
 @login_required

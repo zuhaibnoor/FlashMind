@@ -4,6 +4,7 @@
     <title>Home - FlashMind</title>
     <link rel="stylesheet" href="">
     <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
 <body class="bg-gray-100">
@@ -26,8 +27,8 @@
         <h1 class="text-4xl font-bold text-center">Welcome to FlashMind!</h1>
         <div class="bg-white shadow-md rounded p-6">
             <div class="flex flex-row justify-between items-center mb-4">
-                <h2 class="text-2xl font-semibold mb-4">Your Flashcards</h2>
-                <button onclick="openModal()" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-xl border-black border-2">
+                <h2 class="text-2xl font-semibold mb-1">Your Flashcards</h2>
+                <button onclick="openModal()" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 text-sm md:text-lg rounded-xl border-black border-2">
                     Add Flashcard
                 </button>
             </div>
@@ -35,8 +36,21 @@
                 <ul class="space-y-4">
                     {% for question, answer in flashcards.items() %}
                         <li class="border-b pb-4">
-                            <p class="font-bold text-lg">Q: {{ question }}</p>
-                            <p class="text-gray-700">A: {{ answer }}</p>
+                            <p class="font-bold text-lg"  >Q: {{ question }}</p>
+                            <p class="text-gray-700" >A: {{ answer }}</p>
+                            <div class="flex space-x-4 mt-2">
+                                
+                                <!-- Edit Button -->
+                                <button onclick="openModal('{{ question }}', '{{ answer }}')" class="p-1 hover:scale-125 hover:shadow-lg rounded-full" >
+                                    <img src="../static/images/edit.png" alt="Edit" class="w-6 h-6 ">
+                                </button>
+
+                                <!-- Delete Button -->
+                                <button onclick="window.location.href='/delete_flashcard?question={{ question | urlencode }}'" class="p-1 hover:scale-125 hover:shadow-lg rounded-full">
+                                    <img src="../static/images/delete.png" alt="Delete" class="w-6 h-6 ">
+                                </button>
+                                
+                            </div>
                         </li>
                     {% endfor %}
                 </ul>
@@ -51,22 +65,24 @@
      <!-- Modal -->
      <div id="addFlashcardModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-lg shadow-lg p-6 w-96">
-            <h2 class="text-2xl font-bold mb-4">Add Flashcard</h2>
-            <form method="POST" action="/add_flashcard">
+            <h2 id="modalTitle" class="text-2xl font-bold mb-4">Add Flashcard</h2>
+            <form id="flashcardForm" method="POST" action="/add_flashcard">
+                <input type="hidden" id="old_question" name="old_question" value="">
                 <div class="mb-4">
                     <label for="question" class="block text-sm font-medium text-gray-700">Question</label>
-                    <input type="text" id="question" name="question" class="border border-gray-300 rounded w-full p-2" required>
+                    <input type="text" id="question" name="question" class="border border-gray-300 rounded w-full p-2" required   autocomplete="off">
                 </div>
                 <div class="mb-4">
                     <label for="answer" class="block text-sm font-medium text-gray-700">Answer</label>
-                    <input type="text" id="answer" name="answer" class="border border-gray-300 rounded w-full p-2" required>
+                    <textarea id="answer" name="answer" class="border border-gray-300 rounded w-full p-2"  autocomplete="off" rows="4" required oninput="updateCharCount(this, 200)"></textarea>
+                    <p id="wordCount" class="text-sm text-gray-500 mt-1">0/200</p>
                 </div>
                 <div class="flex justify-end">
                     <button type="button" onclick="closeModal()" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded mr-2">
                         Cancel
                     </button>
                     <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
-                        Add
+                        Save
                     </button>
                 </div>
             </form>
@@ -75,13 +91,48 @@
 
     <!-- JavaScript for Modal -->
     <script>
-        function openModal() {
+        function openModal(question = '', answer = '') {
+            // Update modal title and form action
+            const modalTitle = document.getElementById('modalTitle');
+            const form = document.getElementById('flashcardForm');
+    
+            if (question && answer) {
+                modalTitle.textContent = 'Edit Flashcard';
+                form.action = '/edit_flashcard'; // Change form action to edit
+                document.getElementById('old_question').value = question; // Store old question for editing
+            } else {
+                modalTitle.textContent = 'Add Flashcard';
+                form.action = '/add_flashcard'; // Change form action to add
+                document.getElementById('old_question').value = ''; // Clear old question
+            }
+    
+            // Populate the form fields
+            document.getElementById('question').value = question;
+            document.getElementById('answer').value = answer;
+    
+            // Show the modal
             document.getElementById('addFlashcardModal').classList.remove('hidden');
         }
+    
 
         function closeModal() {
             document.getElementById('addFlashcardModal').classList.add('hidden');
         }
+
+
+        function updateCharCount(textarea, limit) {
+            const charCount = textarea.value.length; 
+            const charCountDisplay = document.getElementById('wordCount'); 
+
+            
+            if (charCount > limit) {
+                textarea.value = textarea.value.substring(0, limit);
+            }
+
+            
+            
+            charCountDisplay.textContent = `${charCount}/${limit}`;
+    }
     </script>
 
 </body>

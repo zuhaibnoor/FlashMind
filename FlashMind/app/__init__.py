@@ -7,7 +7,7 @@ from flask_login import LoginManager
 app = Flask(__name__)
 
 app.config['MONGO_URI'] = "mongodb+srv://zuhaib:zuhaib123@mycluster.sea773x.mongodb.net/FlashMind?retryWrites=true&w=majority&appName=mycluster"
-# app.config['DEBUG'] = True
+app.config['DEBUG'] = True
 app.config['SECRET_KEY'] = "1213"
 
 mongo = PyMongo(app)
