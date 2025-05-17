@@ -1,7 +1,7 @@
-from flask import render_template, redirect, url_for
-from flask_login import login_required, login_user, UserMixin
+from flask import render_template, redirect
+from flask_login import login_required, login_user, UserMixin, logout_user, current_user
 from app import mongo, bcrypt, app, login_manager
-from flask import request, flash
+from flask import request
 
 @login_manager.user_loader
 def load_user(email):
@@ -9,13 +9,15 @@ def load_user(email):
     user = mongo.db.FlashMind.find_one({'email': email})
     if user:
         # Return a simple user object with an id attribute (required by Flask-Login)
-        return SimpleUser(user['email'])
+        return OurUser(user['email'], user['flashcards'])
     return None
 
 # Define a simple user class
-class SimpleUser(UserMixin):
-    def __init__(self, email):
+class OurUser(UserMixin):
+    def __init__(self, email, flashcards=None):
         self.id = email  # Use email as the unique identifier
+               
+        self.flashcards = flashcards
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -25,14 +27,17 @@ def login():
 
         # Find the user by email
         user = mongo.db.FlashMind.find_one({'email': email})
+        print(user)
 
         if user and bcrypt.check_password_hash(user['password'], password):
             # Log the user in using the SimpleUser class
-            login_user(SimpleUser(user['email']))
-            flash('Login successful!', 'success')
-            return redirect(url_for('home'))
-        else:
-            flash('Invalid email or password', 'danger')
+            login_user(OurUser(user['email']), user['flashcards'])
+            # flash('Login successful!', 'success')
+            # return redirect(url_for('home'))
+            return redirect('/home')
+
+        # else:
+        #     flash('Invalid email or password', 'danger')
 
     return render_template('login.html')
         
@@ -49,13 +54,42 @@ def signup():
         mongo.db.FlashMind.insert_one({'email': email,
                                         'username': username,
                                         'password': hashed_password,
-                                        'flashcards': [] })
+                                        'flashcards': {} })
         
-        return redirect(url_for('login'))
+        return redirect('/login')
     return render_template('signup.html')
 
+
+@app.route('/logout', methods = ['GET'])
+@login_required
+def logout():
+    logout_user()
+    return redirect('/login')
+
+
+@app.route('/add_flashcard', methods = ['POST'])
+@login_required
+def add_flashcard():
+    if request.method == "POST":
+        
+        new_flashcard = {
+            'question': request.form.get('question'),
+            'answer': request.form.get('answer')
+        }
+
+        current_user.flashcards[new_flashcard['question']] = new_flashcard['answer']
+
+        mongo.db.FlashMind.update_one(
+            {'email': current_user.id},
+            {'$set': {'flashcards':current_user.flashcards} }
+        )
+        return redirect('/home')
+
+        
 
 @app.route('/home', methods = ['GET', 'POST'])
 @login_required
 def home():
-    return render_template('home.html')
+    flashcards = current_user.flashcards
+    print(flashcards)
+    return render_template('home.html', flashcards=flashcards)

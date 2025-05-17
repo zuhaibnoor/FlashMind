@@ -1,10 +1,88 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>home</title>
+    <title>Home - FlashMind</title>
+    <link rel="stylesheet" href="">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h1>this is homepage</h1>
-    
+
+<body class="bg-gray-100">
+
+    <!-- Navbar -->
+    <nav class="bg-blue-600 text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <!-- Heading -->
+            <h1 class="text-2xl font-bold ">FlashMind</h1>
+            <!-- Logout Button -->
+            <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-xl border-black border-2 ">
+                Logout
+            </a>
+            
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="mx-auto mt-10">
+        <h1 class="text-4xl font-bold text-center">Welcome to FlashMind!</h1>
+        <div class="bg-white shadow-md rounded p-6">
+            <div class="flex flex-row justify-between items-center mb-4">
+                <h2 class="text-2xl font-semibold mb-4">Your Flashcards</h2>
+                <button onclick="openModal()" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-xl border-black border-2">
+                    Add Flashcard
+                </button>
+            </div>
+            {% if flashcards %}
+                <ul class="space-y-4">
+                    {% for question, answer in flashcards.items() %}
+                        <li class="border-b pb-4">
+                            <p class="font-bold text-lg">Q: {{ question }}</p>
+                            <p class="text-gray-700">A: {{ answer }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-gray-500">You have no flashcards yet. Start adding some!</p>
+            {% endif %}
+        </div>
+
+    </div>
+
+
+     <!-- Modal -->
+     <div id="addFlashcardModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+            <h2 class="text-2xl font-bold mb-4">Add Flashcard</h2>
+            <form method="POST" action="/add_flashcard">
+                <div class="mb-4">
+                    <label for="question" class="block text-sm font-medium text-gray-700">Question</label>
+                    <input type="text" id="question" name="question" class="border border-gray-300 rounded w-full p-2" required>
+                </div>
+                <div class="mb-4">
+                    <label for="answer" class="block text-sm font-medium text-gray-700">Answer</label>
+                    <input type="text" id="answer" name="answer" class="border border-gray-300 rounded w-full p-2" required>
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" onclick="closeModal()" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded mr-2">
+                        Cancel
+                    </button>
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
+                        Add
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript for Modal -->
+    <script>
+        function openModal() {
+            document.getElementById('addFlashcardModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('addFlashcardModal').classList.add('hidden');
+        }
+    </script>
+
 </body>
 </html>

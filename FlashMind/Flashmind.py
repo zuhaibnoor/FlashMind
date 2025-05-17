@@ -2,14 +2,14 @@ import requests
 import json
 
 headers = {
-    "Authorization": "Bearer ",
+    "Authorization": "Bearer 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",
     "Content-Type": "application/json"
 }
 
 data = {
     "model": "mistralai/mistral-7b-instruct",
     "messages": [
-        {"role": "user", "content": "Write a bedtime story about a flying squirrel."}
+        {"role": "user", "content": "hello"}
     ]
 }
 
