@@ -130,3 +130,8 @@ def home():
     flashcards = current_user.flashcards
     print(flashcards)
     return render_template('home.html', flashcards=flashcards)
+
+
+@app.route('/', methods = ['GET'])
+def index():
+    return render_template('signup.html')
