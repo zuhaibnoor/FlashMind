@@ -106,7 +106,7 @@ def edit_flashcard():
             {'$set':{'flashcards': current_user.flashcards}}
         )
 
-    return render_template('home.html', flashcards = current_user.flashcards)
+    return redirect('/home')
 
 
 @app.route('/delete_flashcard', methods = ['GET'])

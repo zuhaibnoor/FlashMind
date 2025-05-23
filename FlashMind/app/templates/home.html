@@ -72,9 +72,12 @@
                     <label for="question" class="block text-sm font-medium text-gray-700">Question</label>
                     <input type="text" id="question" name="question" class="border border-gray-300 rounded w-full p-2" required   autocomplete="off">
                 </div>
-                <div class="mb-4">
+                <div class="mb-4 relative">
                     <label for="answer" class="block text-sm font-medium text-gray-700">Answer</label>
                     <textarea id="answer" name="answer" class="border border-gray-300 rounded w-full p-2"  autocomplete="off" rows="4" required oninput="updateCharCount(this, 200)"></textarea>
+                    <button type="button" onclick="generateAIAnswer(this)" class="absolute top-[-6px] right-0 mr-2 text-sm font-medium text-gray-700 bg-blue-400 p-[2px] pl-2 pr-2 text-white hover:border hover:bg-blue-500 hover:scale-109 rounded-lg">
+                        Use AI ✨
+                    </button>
                     <p id="wordCount" class="text-sm text-gray-500 mt-1">0/200</p>
                 </div>
                 <div class="flex justify-end">
@@ -98,11 +101,11 @@
     
             if (question && answer) {
                 modalTitle.textContent = 'Edit Flashcard';
-                form.action = '/edit_flashcard'; // Change form action to edit
-                document.getElementById('old_question').value = question; // Store old question for editing
+                form.action = '/edit_flashcard'; 
+                document.getElementById('old_question').value = question; 
             } else {
                 modalTitle.textContent = 'Add Flashcard';
-                form.action = '/add_flashcard'; // Change form action to add
+                form.action = '/add_flashcard'; 
                 document.getElementById('old_question').value = ''; // Clear old question
             }
     
@@ -133,7 +136,69 @@
             
             charCountDisplay.textContent = `${charCount}/${limit}`;
     }
-    </script>
 
+    async function generateAIAnswer(button){
+        
+        button.innerHTML = "Generating Answer...";
+        button.disabled = true;
+        button.classList.add("cursor-progress");
+
+        
+        question = document.getElementById('question').value;
+        answer_input = document.getElementById('answer');
+
+        if (question){
+            const APIUrl = "https://openrouter.ai/api/v1/chat/completions";
+            const APIkey = prompt("Enter API key:");
+
+            if(APIkey){
+                const headers = {
+                    "authorization": `Bearer ${APIkey}`,
+                    "Content-Type": "application/json",
+                }
+
+                const body = {
+                    "model": "mistralai/mistral-7b-instruct",
+                    "messages": [
+                    {"role": "user", "content": `Here are the instructions for answering this question by flashcard app user: 
+                                                You are suppose to give answer of this question within 190 characters not more than 190,
+                                                give simple answer directly, donot use surely here's the answer phrases, please!
+                                                here's the question: ${question}`}]
+                }
+
+                try{
+                    const response = await fetch(APIUrl,
+                        {
+                            method: 'POST',
+                            headers: headers,
+                            body: JSON.stringify(body)
+
+                        }
+                    )
+
+                    const data = await response.json();
+                    console.log(data.choices[0].message.content);
+                    const new_answer = data.choices[0].message.content;
+                    answer_input.value = new_answer;
+                    updateCharCount(answer_input, 200);
+                }
+
+                catch{
+                    alert("Not able to fetch answer right now, try again later.")
+                }
+                
+            }
+            else{
+                alert("Please enter a valid API key.");
+            }
+        
+            button.innerHTML = "Use AI ✨";
+            button.disabled = false;
+            button.classList.remove("cursor-progress");
+        }
+        // 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
+    }
+
+    </script>
 </body>
 </html>
