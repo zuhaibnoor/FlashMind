@@ -132,6 +132,6 @@ def home():
     return render_template('home.html', flashcards=flashcards)
 
 
-@app.route('/', methods = ['GET'])
+@app.route('/', methods = ['GET', 'POST'])
 def index():
     return render_template('signup.html')
