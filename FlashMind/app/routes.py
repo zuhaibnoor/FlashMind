@@ -1,4 +1,4 @@
-from flask import render_template, redirect
+from flask import render_template, redirect, flash
 from flask_login import login_required, login_user, UserMixin, logout_user, current_user
 from app import mongo, bcrypt, app, login_manager
 from flask import request
@@ -36,8 +36,8 @@ def login():
             # return redirect(url_for('home'))
             return redirect('/home')
 
-        # else:
-        #     flash('Invalid email or password', 'danger')
+        else:
+            flash('Invalid email or password', 'danger')
 
     return render_template('login.html')
         
