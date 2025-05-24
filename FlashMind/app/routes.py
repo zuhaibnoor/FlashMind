@@ -134,4 +134,4 @@ def home():
 
 @app.route('/', methods = ['GET', 'POST'])
 def index():
-    return render_template('signup.html')
+    return redirect('/signup')
